@@ -1,4 +1,12 @@
-from fastapi import Cookie, Depends, FastAPI, HTTPException, Response, status
+from fastapi import (
+    Cookie,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    Response,
+    status,
+)
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -75,7 +83,11 @@ def me(current_user: User = Depends(require_session)):
 
 
 @app.get("/authors", response_model=list[schemas.AuthorOut], tags=["authors"])
-def read_authors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_authors(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
     return crud.list_authors(db, skip=skip, limit=limit)
 
 

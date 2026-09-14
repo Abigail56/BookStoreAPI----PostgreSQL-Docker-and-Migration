@@ -20,6 +20,11 @@ Author (1) ──< (many) Book        via Book.author_id -> Author.id (ON DELETE
 User   (1) ──< (many) Session     server-side session store backing the auth cookie
 ```
 
+The latest migration seeds 60 sample authors. Their database-generated `id`
+values can be used with `GET /authors/{id}` and as `author_id` when creating
+or updating books. Author writes use the authenticated `POST /authors` and
+`PUT /authors/{id}` endpoints.
+
 ## Running it
 
 1. Copy `.env.example` to `.env` (a working `.env` with dev defaults is
