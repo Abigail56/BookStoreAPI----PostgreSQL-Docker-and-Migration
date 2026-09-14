@@ -1,0 +1,58 @@
+digraph BookstoreArchitecture {
+    rankdir=LR;
+    fontname="Helvetica";
+    node [fontname="Helvetica", shape=box, style="rounded,filled", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    subgraph cluster_client {
+        label="Client";
+        style=dashed; color="#888888"; fontcolor="#555555";
+        client [label="Swagger UI / HTTP client\n(/docs)", fillcolor="#E8F0FE", color="#4285F4"];
+    }
+
+    subgraph cluster_api_container {
+        label="Docker: api container";
+        style=dashed; color="#888888"; fontcolor="#555555";
+
+        entrypoint [label="entrypoint.sh\n1. wait for db\n2. alembic upgrade head\n3. exec uvicorn", fillcolor="#FFF3CD", color="#B8860B"];
+
+        subgraph cluster_fastapi {
+            label="FastAPI app (app/main.py)";
+            style=solid; color="#666666";
+
+            auth_routes [label="/auth/register\n/auth/login\n/auth/logout\n/auth/me", fillcolor="#FDE8E8", color="#D93025"];
+            author_routes [label="/authors\nGET · POST · PUT · DELETE", fillcolor="#E6F4EA", color="#188038"];
+            book_routes [label="/books\nGET · POST · PUT · DELETE", fillcolor="#E6F4EA", color="#188038"];
+
+            auth_dep [label="require_session()\nCookie-based session\ndependency (app/auth.py)", fillcolor="#FCE8F3", color="#A50E82"];
+            crud [label="crud.py\nORM operations", fillcolor="#E8EAED", color="#5F6368"];
+            models [label="models.py\nAuthor · Book · User · Session\n(SQLModel)", fillcolor="#E8EAED", color="#5F6368"];
+        }
+    }
+
+    subgraph cluster_db_container {
+        label="Docker: db container";
+        style=dashed; color="#888888"; fontcolor="#555555";
+        postgres [label="PostgreSQL 16\n(authors, books, users, sessions)", fillcolor="#E8F0FE", color="#1A73E8", shape=cylinder];
+    }
+
+    alembic [label="Alembic migrations\nalembic/versions/*.py", fillcolor="#FFF3CD", color="#B8860B", shape=note];
+
+    client -> auth_routes [label="  POST credentials"];
+    client -> author_routes;
+    client -> book_routes;
+
+    author_routes -> auth_dep [label="  write ops only", style=dashed];
+    book_routes -> auth_dep [label="  write ops only", style=dashed];
+    auth_routes -> crud [style=dashed, label="  user/session\n  lookups"];
+
+    auth_dep -> crud [style=dashed];
+    author_routes -> crud;
+    book_routes -> crud;
+    crud -> models;
+    models -> postgres [label="  SQLAlchemy engine\n  (DATABASE_URL env var)"];
+
+    entrypoint -> alembic [label="  runs on\n  container start"];
+    alembic -> postgres [label="  DDL"];
+    entrypoint -> auth_routes [style=invis];
+}

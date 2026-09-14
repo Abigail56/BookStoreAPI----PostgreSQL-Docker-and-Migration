@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.db
+.git/
+.gitignore
+README.md
+architecture.dot
+architecture.png
+architecture.svg
+venv/
+.venv/
