@@ -38,6 +38,14 @@ User   (1) ──< (many) Session     server-side session store backing the auth
 
 3. Open the Swagger UI at **http://localhost:8000/docs**.
 
+## Deploying on Render
+
+Create a Render PostgreSQL database and a Docker Web Service. In the Web
+Service environment variables, add `DATABASE_URL` using the database's
+**Internal Database URL**. Do not use the URL in a browser and do not commit
+`.env`. The container waits for PostgreSQL, runs `alembic upgrade head`, and
+starts FastAPI on Render's assigned `PORT`.
+
 ## Testing via Swagger UI
 
 1. `POST /auth/register` — create a user (`username`, `password`, min 8 chars).

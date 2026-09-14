@@ -1,6 +1,12 @@
 #!/usr/bin/env sh
 set -e
 
+if [ -z "${DATABASE_URL:-}" ]; then
+    echo "ERROR: DATABASE_URL is not configured for this service." >&2
+    echo "Add the Render PostgreSQL Internal Database URL as a DATABASE_URL environment variable." >&2
+    exit 1
+fi
+
 echo "Waiting for database to accept connections..."
 python - <<'PYEOF'
 import os
